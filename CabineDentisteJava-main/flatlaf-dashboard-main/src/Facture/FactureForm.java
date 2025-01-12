@@ -16,7 +16,7 @@ public class FactureForm extends JPanel {
         setLayout(new BorderLayout());
 
         // Add Title
-        JLabel title = new JLabel("Invoice Management", JLabel.CENTER);
+        JLabel title = new JLabel("Factures", JLabel.CENTER);
         title.setFont(new Font("Arial", Font.BOLD, 26));
         title.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         add(title, BorderLayout.NORTH);
@@ -45,6 +45,11 @@ public class FactureForm extends JPanel {
         factureTable = new JTable(tableModel);
         factureTable.setRowHeight(30);
         factureTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        factureTable.getTableHeader().setFont(new Font("Arial", Font.BOLD, 14));
+        factureTable.getTableHeader().setBackground(new Color(200, 200, 200));
+        factureTable.getTableHeader().setForeground(Color.BLACK);
+        factureTable.setSelectionBackground(new Color(173, 216, 230));
+        factureTable.setSelectionForeground(Color.BLACK);
 
         // Add table to a scroll pane
         JScrollPane scrollPane = new JScrollPane(factureTable);
@@ -64,9 +69,9 @@ public class FactureForm extends JPanel {
         JButton editButton = new JButton("Edit");
         JButton deleteButton = new JButton("Delete");
 
-        addButton.setPreferredSize(new Dimension(100, 30));
-        editButton.setPreferredSize(new Dimension(100, 30));
-        deleteButton.setPreferredSize(new Dimension(100, 30));
+        configureButtonStyle(addButton);
+        configureButtonStyle(editButton);
+        configureButtonStyle(deleteButton);
 
         // Add Action Listeners
         addButton.addActionListener(e -> addFacture());
@@ -79,6 +84,15 @@ public class FactureForm extends JPanel {
         buttonPanel.add(deleteButton);
 
         add(buttonPanel, BorderLayout.SOUTH);
+    }
+
+    private void configureButtonStyle(JButton button) {
+        button.setPreferredSize(new Dimension(100, 30));
+        button.setFont(new Font("Arial", Font.BOLD, 14));
+        button.setBackground(new Color(54, 162, 235));
+        button.setForeground(Color.WHITE);
+        button.setFocusPainted(false);
+        button.setBorder(BorderFactory.createLineBorder(new Color(54, 162, 235)));
     }
 
     private void loadSampleData() {

@@ -16,7 +16,7 @@ public class PatientForm extends JPanel {
         setLayout(new BorderLayout());
 
         // Add Title
-        JLabel title = new JLabel("Patient Management", JLabel.CENTER);
+        JLabel title = new JLabel("Patients", JLabel.CENTER);
         title.setFont(new Font("Arial", Font.BOLD, 26));
         title.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         add(title, BorderLayout.NORTH);
@@ -44,7 +44,12 @@ public class PatientForm extends JPanel {
         // Create JTable
         patientTable = new JTable(tableModel);
         patientTable.setRowHeight(30);
-        patientTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        patientTable.setFont(new Font("Arial", Font.PLAIN, 14));
+        patientTable.getTableHeader().setFont(new Font("Arial", Font.BOLD, 14));
+        patientTable.getTableHeader().setBackground(new Color(200, 200, 200));
+        patientTable.getTableHeader().setForeground(Color.BLACK);
+        patientTable.setSelectionBackground(new Color(173, 216, 230));
+        patientTable.setSelectionForeground(Color.BLACK);
 
         // Add table to a scroll pane
         JScrollPane scrollPane = new JScrollPane(patientTable);
@@ -64,11 +69,10 @@ public class PatientForm extends JPanel {
         JButton editButton = new JButton("Edit");
         JButton deleteButton = new JButton("Delete");
 
-        addButton.setPreferredSize(new Dimension(100, 30));
-        editButton.setPreferredSize(new Dimension(100, 30));
-        deleteButton.setPreferredSize(new Dimension(100, 30));
+        configureButtonStyle(addButton);
+        configureButtonStyle(editButton);
+        configureButtonStyle(deleteButton);
 
-        // Add Action Listeners
         addButton.addActionListener(e -> addPatient());
         editButton.addActionListener(e -> editPatient());
         deleteButton.addActionListener(e -> deletePatient());
@@ -80,6 +84,15 @@ public class PatientForm extends JPanel {
 
         // Add panel to the bottom of the form
         add(buttonPanel, BorderLayout.SOUTH);
+    }
+
+    private void configureButtonStyle(JButton button) {
+        button.setPreferredSize(new Dimension(100, 30));
+        button.setFont(new Font("Arial", Font.BOLD, 14));
+        button.setBackground(new Color(54, 162, 235));
+        button.setForeground(Color.WHITE);
+        button.setFocusPainted(false);
+        button.setBorder(BorderFactory.createLineBorder(new Color(54, 162, 235)));
     }
 
     private void loadSampleData() {

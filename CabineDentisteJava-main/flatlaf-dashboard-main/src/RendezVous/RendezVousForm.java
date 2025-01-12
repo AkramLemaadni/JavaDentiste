@@ -16,7 +16,7 @@ public class RendezVousForm extends JPanel {
         setLayout(new BorderLayout());
 
         // Add Title
-        JLabel title = new JLabel("Appointment Management", JLabel.CENTER);
+        JLabel title = new JLabel("Rendez-Vous", JLabel.CENTER);
         title.setFont(new Font("Arial", Font.BOLD, 26));
         title.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         add(title, BorderLayout.NORTH);
@@ -44,7 +44,12 @@ public class RendezVousForm extends JPanel {
         // Create the table
         appointmentTable = new JTable(tableModel);
         appointmentTable.setRowHeight(30);
-        appointmentTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        appointmentTable.setFont(new Font("Arial", Font.PLAIN, 14));
+        appointmentTable.getTableHeader().setFont(new Font("Arial", Font.BOLD, 14));
+        appointmentTable.getTableHeader().setBackground(new Color(200, 200, 200));
+        appointmentTable.getTableHeader().setForeground(Color.BLACK);
+        appointmentTable.setSelectionBackground(new Color(173, 216, 230));
+        appointmentTable.setSelectionForeground(Color.BLACK);
 
         // Add table to a scroll pane
         JScrollPane scrollPane = new JScrollPane(appointmentTable);
@@ -64,6 +69,10 @@ public class RendezVousForm extends JPanel {
         JButton editButton = new JButton("Edit");
         JButton deleteButton = new JButton("Delete");
 
+        configureButtonStyle(addButton);
+        configureButtonStyle(editButton);
+        configureButtonStyle(deleteButton);
+
         // Add Action Listeners
         addButton.addActionListener(e -> addAppointment());
         editButton.addActionListener(e -> editAppointment());
@@ -75,6 +84,15 @@ public class RendezVousForm extends JPanel {
         buttonPanel.add(deleteButton);
 
         add(buttonPanel, BorderLayout.SOUTH);
+    }
+
+    private void configureButtonStyle(JButton button) {
+        button.setPreferredSize(new Dimension(100, 30));
+        button.setFont(new Font("Arial", Font.BOLD, 14));
+        button.setBackground(new Color(54, 162, 235));
+        button.setForeground(Color.WHITE);
+        button.setFocusPainted(false);
+        button.setBorder(BorderFactory.createLineBorder(new Color(54, 162, 235)));
     }
 
     private void loadSampleData() {

@@ -108,7 +108,7 @@ public class MainForm extends JLayeredPane {
                     Application.showForm(new FactureForm()); // Replace with your Facture form
                     break;
 
-                case 9: // Logout
+                case 5: // Logout
                     Application.logout();
                     break;
 
