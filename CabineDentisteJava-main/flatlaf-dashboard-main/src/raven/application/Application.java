@@ -7,9 +7,8 @@ import com.formdev.flatlaf.FlatLightLaf;
 import com.formdev.flatlaf.extras.FlatAnimatedLafChange;
 import com.formdev.flatlaf.fonts.roboto.FlatRobotoFont;
 import com.formdev.flatlaf.themes.FlatMacDarkLaf;
-import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.Font;
+
+import java.awt.*;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import raven.application.form.LoginForm;
@@ -39,8 +38,13 @@ public class Application extends javax.swing.JFrame {
     }
 
     public static void showForm(Component component) {
-        component.applyComponentOrientation(app.getComponentOrientation());
-        app.mainForm.showForm(component);
+        if (component instanceof Container) {
+            component.applyComponentOrientation(app.getComponentOrientation());
+            app.setContentPane((Container) component);
+            SwingUtilities.updateComponentTreeUI(app);
+        } else {
+            throw new IllegalArgumentException("Component must be a Container.");
+        }
     }
 
     public static void login() {
