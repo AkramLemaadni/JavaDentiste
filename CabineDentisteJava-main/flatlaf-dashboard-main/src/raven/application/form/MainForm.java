@@ -145,6 +145,7 @@ public class MainForm extends JLayeredPane {
         menu.hideMenuItem();
     }
 
+
     private class MainFormLayout implements LayoutManager {
         @Override
         public void addLayoutComponent(String name, Component comp) {

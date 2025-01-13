@@ -37,6 +37,7 @@ public class Application extends javax.swing.JFrame {
         getContentPane().setBackground(new java.awt.Color(46, 80, 119));
     }
 
+    // Method to display the selected form
     public static void showForm(Component component) {
         if (component instanceof Container) {
             component.applyComponentOrientation(app.getComponentOrientation());
@@ -47,23 +48,25 @@ public class Application extends javax.swing.JFrame {
         }
     }
 
+    // Method for handling login
     public static void login() {
         FlatAnimatedLafChange.showSnapshot();
         app.setContentPane(app.mainForm);
         app.mainForm.applyComponentOrientation(app.getComponentOrientation());
-        setSelectedMenu(0, 0);
-        app.mainForm.hideMenu();
         SwingUtilities.updateComponentTreeUI(app.mainForm);
         FlatAnimatedLafChange.hideSnapshotWithAnimation();
     }
 
+    // Method for handling logout
     public static void logout() {
         FlatAnimatedLafChange.showSnapshot();
         app.setContentPane(app.loginForm);
         app.loginForm.applyComponentOrientation(app.getComponentOrientation());
+        SwingUtilities.updateComponentTreeUI(app.loginForm);
         FlatAnimatedLafChange.hideSnapshotWithAnimation();
     }
 
+    // Method to set the selected menu
     public static void setSelectedMenu(int index, int subIndex) {
         app.mainForm.setSelectedMenu(index, subIndex);
     }
@@ -77,17 +80,18 @@ public class Application extends javax.swing.JFrame {
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 719, Short.MAX_VALUE)
+                layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGap(0, 719, Short.MAX_VALUE)
         );
         layout.setVerticalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 521, Short.MAX_VALUE)
+                layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGap(0, 521, Short.MAX_VALUE)
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
+    // Main method
     public static void main(String args[]) {
         FlatRobotoFont.install();
         FlatLaf.registerCustomDefaultsSource("raven.theme");
@@ -95,7 +99,6 @@ public class Application extends javax.swing.JFrame {
         FlatLightLaf.setup();
         java.awt.EventQueue.invokeLater(() -> {
             app = new Application();
-            //  app.applyComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
             app.setVisible(true);
         });
     }
