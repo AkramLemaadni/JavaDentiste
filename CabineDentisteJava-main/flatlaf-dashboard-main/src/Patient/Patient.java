@@ -1,5 +1,9 @@
 package Patient;
 
+import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
+
 public class Patient {
 
     private int id;
@@ -7,8 +11,8 @@ public class Patient {
     private String email;
     private String phone;
     private String address;
-    private String dateOfBirth; // Added: Date of birth for the patient
-    private String medicalHistory; // Added: Medical history summary
+    private String dateOfBirth; // Date of birth for the patient
+    private String medicalHistory; // Medical history summary
 
     public Patient(int id, String name, String email, String phone, String address, String dateOfBirth, String medicalHistory) {
         this.id = id;
@@ -41,4 +45,50 @@ public class Patient {
 
     public String getMedicalHistory() { return medicalHistory; }
     public void setMedicalHistory(String medicalHistory) { this.medicalHistory = medicalHistory; }
+
+    // Convert Patient to a CSV-like string
+    @Override
+    public String toString() {
+        return id + "," + name + "," + email + "," + phone + "," + address + "," + dateOfBirth + "," + medicalHistory;
+    }
+
+    // Convert a CSV-like string to a Patient object
+    public static Patient fromString(String line) {
+        String[] parts = line.split(",");
+        return new Patient(
+                Integer.parseInt(parts[0]),
+                parts[1],
+                parts[2],
+                parts[3],
+                parts[4],
+                parts[5],
+                parts[6]
+        );
+    }
+
+    // Load all patients from a file
+    public static List<Patient> loadFromFile(String filePath) {
+        List<Patient> patients = new ArrayList<>();
+        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                patients.add(Patient.fromString(line));
+            }
+        } catch (IOException e) {
+            System.out.println("Error while loading patients: " + e.getMessage());
+        }
+        return patients;
+    }
+
+    // Save all patients to a file
+    public static void saveAllToFile(String filePath, List<Patient> patients) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
+            for (Patient patient : patients) {
+                writer.write(patient.toString());
+                writer.newLine();
+            }
+        } catch (IOException e) {
+            System.out.println("Error while saving patients: " + e.getMessage());
+        }
+    }
 }

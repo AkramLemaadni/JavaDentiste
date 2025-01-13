@@ -39,15 +39,24 @@ public class FormDashboard extends JPanel {
     private JPanel createBarChartPanel() {
         // Data for bar chart
         DefaultCategoryDataset dataset = new DefaultCategoryDataset();
-        dataset.addValue(30, "Patients", "January");
-        dataset.addValue(50, "Patients", "February");
-        dataset.addValue(40, "Patients", "March");
+        dataset.addValue(100, "Patients", "Janvier");
+        dataset.addValue(170, "Patients", "Février");
+        dataset.addValue(300, "Patients", "Mars");
+        dataset.addValue(180, "Patients", "Avril");
+        dataset.addValue(198, "Patients", "Mai");
+        dataset.addValue(175, "Patients", "Juin");
+        dataset.addValue(250, "Patients", "Juillet");
+        dataset.addValue(50, "Patients", "Aout");
+        dataset.addValue(40, "Patients", "Septembre");
+        dataset.addValue(30, "Patients", "Octobre");
+        dataset.addValue(50, "Patients", "Novembre");
+        dataset.addValue(30, "Patients", "Decembre");
 
         // Create bar chart
         JFreeChart chart = ChartFactory.createBarChart(
                 "Nombre des patients pour mois",
                 "Mois",
-                "Nombre",
+                "Nombre des patients",
                 dataset
         );
 
@@ -66,9 +75,9 @@ public class FormDashboard extends JPanel {
     private JPanel createPieChartPanel() {
         // Data for pie chart
         DefaultPieDataset dataset = new DefaultPieDataset();
-        dataset.setValue("Completed", 40);
-        dataset.setValue("Pending", 30);
-        dataset.setValue("Cancelled", 30);
+        dataset.setValue("Complété", 40);
+        dataset.setValue("En attente", 30);
+        dataset.setValue("Annulé", 30);
 
         // Create pie chart
         JFreeChart chart = ChartFactory.createPieChart(
@@ -112,8 +121,8 @@ public class FormDashboard extends JPanel {
 
         // Add stat cards
         statsPanel.add(createStatCard("Total des Patients", "120", new Color(46, 204, 113)));
-        statsPanel.add(createStatCard("Growth Rate", "15%", new Color(52, 152, 219)));
-        statsPanel.add(createStatCard("Monthly Revenue", "€5000", new Color(231, 76, 60)));
+        statsPanel.add(createStatCard("Taux de croissance", "15%", new Color(52, 152, 219)));
+        statsPanel.add(createStatCard("Revenu mensuel", "5000Dh", new Color(231, 76, 60)));
 
         return statsPanel;
     }

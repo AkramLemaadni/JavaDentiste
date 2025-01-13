@@ -3,7 +3,6 @@ package Doctor;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.util.ArrayList;
 import java.util.List;
 
 public class DoctorForm extends JPanel {
@@ -11,6 +10,7 @@ public class DoctorForm extends JPanel {
     private DefaultTableModel tableModel;
     private JTable doctorTable;
     private List<Doctor> doctors;
+    private final String filePath = "C:\\Users\\Admin\\Desktop\\CabineDentisteJava-main\\CabineDentisteJava-main\\flatlaf-dashboard-main\\data\\doctors.txt";
 
     public DoctorForm() {
         setLayout(new BorderLayout());
@@ -22,7 +22,7 @@ public class DoctorForm extends JPanel {
 
         setupTable();
         setupButtons();
-        loadSampleData();
+        loadDoctorsFromFile();
     }
 
     private void setupTable() {
@@ -46,8 +46,6 @@ public class DoctorForm extends JPanel {
         JScrollPane scrollPane = new JScrollPane(doctorTable);
         scrollPane.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         add(scrollPane, BorderLayout.CENTER);
-
-        doctors = new ArrayList<>();
     }
 
     private void setupButtons() {
@@ -80,10 +78,9 @@ public class DoctorForm extends JPanel {
         button.setBorder(BorderFactory.createLineBorder(new Color(54, 162, 235)));
     }
 
-    private void loadSampleData() {
-        doctors.add(new Doctor(1, "Dr. Smith", "Dentist", "123456789", "smith@example.com"));
-        doctors.add(new Doctor(2, "Dr. Johnson", "Orthodontist", "987654321", "johnson@example.com"));
-
+    private void loadDoctorsFromFile() {
+        doctors = Doctor.loadFromFile(filePath);
+        tableModel.setRowCount(0); // Clear table
         for (Doctor doctor : doctors) {
             tableModel.addRow(new Object[]{
                     doctor.getId(),
@@ -107,14 +104,8 @@ public class DoctorForm extends JPanel {
         Doctor newDoctor = new Doctor(newId, name, specialization, phone, email);
         doctors.add(newDoctor);
 
-        tableModel.addRow(new Object[]{
-                newDoctor.getId(),
-                newDoctor.getName(),
-                newDoctor.getSpecialization(),
-                newDoctor.getPhone(),
-                newDoctor.getEmail()
-        });
-
+        Doctor.saveAllToFile(filePath, doctors);
+        loadDoctorsFromFile();
         JOptionPane.showMessageDialog(this, "Doctor added successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
     }
 
@@ -128,8 +119,6 @@ public class DoctorForm extends JPanel {
         Doctor doctor = doctors.get(selectedRow);
 
         String name = JOptionPane.showInputDialog(this, "Edit Doctor's Name:", doctor.getName());
-        if (name == null || name.isEmpty()) return;
-
         String specialization = JOptionPane.showInputDialog(this, "Edit Specialization:", doctor.getSpecialization());
         String phone = JOptionPane.showInputDialog(this, "Edit Phone Number:", doctor.getPhone());
         String email = JOptionPane.showInputDialog(this, "Edit Email Address:", doctor.getEmail());
@@ -139,11 +128,8 @@ public class DoctorForm extends JPanel {
         doctor.setPhone(phone);
         doctor.setEmail(email);
 
-        tableModel.setValueAt(name, selectedRow, 1);
-        tableModel.setValueAt(specialization, selectedRow, 2);
-        tableModel.setValueAt(phone, selectedRow, 3);
-        tableModel.setValueAt(email, selectedRow, 4);
-
+        Doctor.saveAllToFile(filePath, doctors);
+        loadDoctorsFromFile();
         JOptionPane.showMessageDialog(this, "Doctor updated successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
     }
 
@@ -154,12 +140,9 @@ public class DoctorForm extends JPanel {
             return;
         }
 
-        int confirm = JOptionPane.showConfirmDialog(this, "Are you sure you want to delete this doctor?", "Confirm Delete", JOptionPane.YES_NO_OPTION);
-        if (confirm != JOptionPane.YES_OPTION) return;
-
         doctors.remove(selectedRow);
-        tableModel.removeRow(selectedRow);
-
+        Doctor.saveAllToFile(filePath, doctors);
+        loadDoctorsFromFile();
         JOptionPane.showMessageDialog(this, "Doctor deleted successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
     }
 }

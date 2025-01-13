@@ -3,7 +3,6 @@ package Facture;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.util.ArrayList;
 import java.util.List;
 
 public class FactureForm extends JPanel {
@@ -11,6 +10,7 @@ public class FactureForm extends JPanel {
     private DefaultTableModel tableModel;
     private JTable factureTable;
     private List<Facture> factures;
+    private final String filePath = "C:\\Users\\Admin\\Desktop\\CabineDentisteJava-main\\CabineDentisteJava-main\\flatlaf-dashboard-main\\data\\factures.txt";
 
     public FactureForm() {
         setLayout(new BorderLayout());
@@ -27,8 +27,8 @@ public class FactureForm extends JPanel {
         // Initialize Buttons
         setupButtons();
 
-        // Load Sample Data
-        loadSampleData();
+        // Load Invoices from File
+        loadFacturesFromFile();
     }
 
     private void setupTable() {
@@ -55,16 +55,11 @@ public class FactureForm extends JPanel {
         JScrollPane scrollPane = new JScrollPane(factureTable);
         scrollPane.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         add(scrollPane, BorderLayout.CENTER);
-
-        // Initialize the list of invoices
-        factures = new ArrayList<>();
     }
 
     private void setupButtons() {
-        // Create Button Panel
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 10));
 
-        // Create Buttons
         JButton addButton = new JButton("Add");
         JButton editButton = new JButton("Edit");
         JButton deleteButton = new JButton("Delete");
@@ -73,12 +68,10 @@ public class FactureForm extends JPanel {
         configureButtonStyle(editButton);
         configureButtonStyle(deleteButton);
 
-        // Add Action Listeners
         addButton.addActionListener(e -> addFacture());
         editButton.addActionListener(e -> editFacture());
         deleteButton.addActionListener(e -> deleteFacture());
 
-        // Add Buttons to Panel
         buttonPanel.add(addButton);
         buttonPanel.add(editButton);
         buttonPanel.add(deleteButton);
@@ -95,12 +88,9 @@ public class FactureForm extends JPanel {
         button.setBorder(BorderFactory.createLineBorder(new Color(54, 162, 235)));
     }
 
-    private void loadSampleData() {
-        // Add sample invoices
-        factures.add(new Facture(1, "Alice Johnson", "01/01/2023", 150.0, "Teeth cleaning"));
-        factures.add(new Facture(2, "Bob Smith", "02/02/2023", 200.0, "Root canal treatment"));
-
-        // Populate the table
+    private void loadFacturesFromFile() {
+        factures = Facture.loadFromFile(filePath);
+        tableModel.setRowCount(0);
         for (Facture facture : factures) {
             tableModel.addRow(new Object[]{
                     facture.getId(),
@@ -113,7 +103,6 @@ public class FactureForm extends JPanel {
     }
 
     private void addFacture() {
-        // Show input dialogs to get invoice details
         String patientName = JOptionPane.showInputDialog(this, "Enter Patient Name:");
         if (patientName == null || patientName.isEmpty()) return;
 
@@ -129,35 +118,25 @@ public class FactureForm extends JPanel {
             return;
         }
 
-        // Add the new invoice to the list
         int newId = factures.size() + 1;
         Facture newFacture = new Facture(newId, patientName, date, amount, description);
         factures.add(newFacture);
 
-        // Add the new invoice to the table
-        tableModel.addRow(new Object[]{
-                newFacture.getId(),
-                newFacture.getPatientName(),
-                newFacture.getDate(),
-                newFacture.getAmount(),
-                newFacture.getDescription()
-        });
+        Facture.saveAllToFile(filePath, factures);
+        loadFacturesFromFile();
 
         JOptionPane.showMessageDialog(this, "Invoice added successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
     }
 
     private void editFacture() {
-        // Get the selected row
         int selectedRow = factureTable.getSelectedRow();
         if (selectedRow == -1) {
             JOptionPane.showMessageDialog(this, "Please select an invoice to edit.", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
-        // Get the invoice to edit
         Facture facture = factures.get(selectedRow);
 
-        // Show input dialogs with pre-filled values
         String patientName = JOptionPane.showInputDialog(this, "Edit Patient Name:", facture.getPatientName());
         if (patientName == null || patientName.isEmpty()) return;
 
@@ -173,36 +152,28 @@ public class FactureForm extends JPanel {
             return;
         }
 
-        // Update the invoice
         facture.setPatientName(patientName);
         facture.setDate(date);
         facture.setAmount(amount);
         facture.setDescription(description);
 
-        // Update the table
-        tableModel.setValueAt(patientName, selectedRow, 1);
-        tableModel.setValueAt(date, selectedRow, 2);
-        tableModel.setValueAt(amount, selectedRow, 3);
-        tableModel.setValueAt(description, selectedRow, 4);
+        Facture.saveAllToFile(filePath, factures);
+        loadFacturesFromFile();
 
         JOptionPane.showMessageDialog(this, "Invoice updated successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
     }
 
     private void deleteFacture() {
-        // Get the selected row
         int selectedRow = factureTable.getSelectedRow();
         if (selectedRow == -1) {
             JOptionPane.showMessageDialog(this, "Please select an invoice to delete.", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
-        // Confirm deletion
-        int confirm = JOptionPane.showConfirmDialog(this, "Are you sure you want to delete this invoice?", "Confirm Delete", JOptionPane.YES_NO_OPTION);
-        if (confirm != JOptionPane.YES_OPTION) return;
-
-        // Remove the invoice from the list and table
         factures.remove(selectedRow);
-        tableModel.removeRow(selectedRow);
+
+        Facture.saveAllToFile(filePath, factures);
+        loadFacturesFromFile();
 
         JOptionPane.showMessageDialog(this, "Invoice deleted successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
     }
