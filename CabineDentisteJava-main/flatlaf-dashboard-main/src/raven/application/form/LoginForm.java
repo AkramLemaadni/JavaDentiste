@@ -4,10 +4,12 @@ import com.formdev.flatlaf.FlatClientProperties;
 import net.miginfocom.swing.MigLayout;
 import raven.application.Application;
 import Infermier.Infermier;
+
 import java.awt.Color;
 import java.util.List;
 import javax.swing.JOptionPane;
 import raven.application.form.other.CreateAccountForm;
+
 /**
  *
  * @author Raven
@@ -58,7 +60,7 @@ public class LoginForm extends javax.swing.JPanel {
         panelLogin1.add(cmdLogin);
 
         cmdCreateAccount.setText("Créer Nouveau Compte");
-        cmdCreateAccount.addActionListener(evt -> cmdCreateAccountActionPerformed(evt));
+        cmdCreateAccount.addActionListener(evt -> cmdCreateAccountActionPerformed(evt)); // Attach the ActionListener
         panelLogin1.add(cmdCreateAccount);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
@@ -82,6 +84,7 @@ public class LoginForm extends javax.swing.JPanel {
     private void cmdLoginActionPerformed(java.awt.event.ActionEvent evt) {
         String username = txtUser.getText();
         String password = new String(txtPass.getPassword());
+
         List<Infermier> infermiers = Infermier.loadFromFile("C:\\Users\\Admin\\Desktop\\CabineDentisteJava-main\\CabineDentisteJava-main\\flatlaf-dashboard-main\\data\\acc.txt");
 
         boolean isValid = infermiers.stream()
@@ -100,6 +103,7 @@ public class LoginForm extends javax.swing.JPanel {
         Application.showForm(new CreateAccountForm());
     }
 
+    // Variables declaration
     private javax.swing.JButton cmdLogin;
     private javax.swing.JButton cmdCreateAccount;
     private javax.swing.JLabel lbPass;

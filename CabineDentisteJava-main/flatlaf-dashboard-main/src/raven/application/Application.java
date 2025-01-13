@@ -9,11 +9,12 @@ import com.formdev.flatlaf.fonts.roboto.FlatRobotoFont;
 import com.formdev.flatlaf.themes.FlatMacDarkLaf;
 
 import java.awt.*;
-import javax.swing.SwingUtilities;
-import javax.swing.UIManager;
+import javax.swing.*;
+
 import raven.application.form.LoginForm;
 import raven.application.form.MainForm;
 import raven.toast.Notifications;
+import raven.application.form.other.CreateAccountForm;
 
 /**
  *
@@ -24,6 +25,7 @@ public class Application extends javax.swing.JFrame {
     private static Application app;
     private final MainForm mainForm;
     private final LoginForm loginForm;
+    private final CreateAccountForm createAccountForm;
 
     public Application() {
         initComponents();
@@ -31,6 +33,7 @@ public class Application extends javax.swing.JFrame {
         setLocationRelativeTo(null);
         mainForm = new MainForm();
         loginForm = new LoginForm();
+        createAccountForm = new CreateAccountForm();
         setContentPane(loginForm);
         getRootPane().putClientProperty(FlatClientProperties.FULL_WINDOW_CONTENT, true);
         Notifications.getInstance().setJFrame(this);
@@ -39,21 +42,47 @@ public class Application extends javax.swing.JFrame {
 
     // Method to display the selected form
     public static void showForm(Component component) {
-        if (component instanceof Container) {
+        if (component == null) {
+            System.err.println("Component cannot be null.");
+            return;
+        }
+
+        // Check if the current form is `MainForm`
+        if (component instanceof JPanel && app.getContentPane() != app.mainForm) {
+            // Global transition: Replace the content pane entirely
+            FlatAnimatedLafChange.showSnapshot();
+            app.setContentPane((JPanel) component);
             component.applyComponentOrientation(app.getComponentOrientation());
-            app.setContentPane((Container) component);
-            SwingUtilities.updateComponentTreeUI(app);
+            app.revalidate();
+            app.repaint();
+            FlatAnimatedLafChange.hideSnapshotWithAnimation();
         } else {
-            throw new IllegalArgumentException("Component must be a Container.");
+            // Internal transition: Use MainForm's panel body
+            app.mainForm.showForm(component);
         }
     }
+
+
+    /*public static void showForm(JPanel panel) {
+        if (app != null) {
+            FlatAnimatedLafChange.showSnapshot();
+            app.setContentPane(panel);
+            panel.applyComponentOrientation(app.getComponentOrientation());
+            app.revalidate();
+            app.repaint();
+            FlatAnimatedLafChange.hideSnapshotWithAnimation();
+        } else {
+            System.err.println("Application instance is null.");
+        }
+    }*/
 
     // Method for handling login
     public static void login() {
         FlatAnimatedLafChange.showSnapshot();
         app.setContentPane(app.mainForm);
         app.mainForm.applyComponentOrientation(app.getComponentOrientation());
-        SwingUtilities.updateComponentTreeUI(app.mainForm);
+        setSelectedMenu(0, 0);
+        app.mainForm.hideMenu();
         FlatAnimatedLafChange.hideSnapshotWithAnimation();
     }
 
@@ -62,7 +91,6 @@ public class Application extends javax.swing.JFrame {
         FlatAnimatedLafChange.showSnapshot();
         app.setContentPane(app.loginForm);
         app.loginForm.applyComponentOrientation(app.getComponentOrientation());
-        SwingUtilities.updateComponentTreeUI(app.loginForm);
         FlatAnimatedLafChange.hideSnapshotWithAnimation();
     }
 
