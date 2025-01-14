@@ -28,8 +28,9 @@ public class Menu extends JPanel {
         {"~MAIN~"},
         {"Tableau de bord"},
         {"PATIENT"},
+            {"DOCTEUR"},
+            {"INFERMIER"},
         {"RENDEZ-VOUS"},
-        {"DOCTEUR"},
             {"FACTURE"},
         {"DECONNEXION"}
     };

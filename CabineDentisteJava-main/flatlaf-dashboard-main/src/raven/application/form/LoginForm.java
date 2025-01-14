@@ -24,6 +24,9 @@ public class LoginForm extends javax.swing.JPanel {
     private void init() {
         setLayout(new MigLayout("al center center"));
 
+        // Set the LoginForm background color
+        setBackground(new Color(46, 80, 119)); // Blue background
+
         panelLogin1.setBackground(new Color(77, 161, 169));
         lbTitle.putClientProperty(FlatClientProperties.STYLE, "font:$h1.font");
         txtPass.putClientProperty(FlatClientProperties.STYLE, "showRevealButton:true;showCapsLock:true");

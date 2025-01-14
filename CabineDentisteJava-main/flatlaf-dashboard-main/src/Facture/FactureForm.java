@@ -21,37 +21,29 @@ public class FactureForm extends JPanel {
         title.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         add(title, BorderLayout.NORTH);
 
-        // Initialize Table
         setupTable();
-
-        // Initialize Buttons
         setupButtons();
-
-        // Load Invoices from File
         loadFacturesFromFile();
     }
 
     private void setupTable() {
-        // Define table columns
         String[] columns = {"ID", "Patient Name", "Date", "Amount", "Description"};
         tableModel = new DefaultTableModel(columns, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
-                return false; // Make cells non-editable
+                return false;
             }
         };
 
-        // Create the table
         factureTable = new JTable(tableModel);
         factureTable.setRowHeight(30);
-        factureTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        factureTable.setFont(new Font("Arial", Font.PLAIN, 14));
         factureTable.getTableHeader().setFont(new Font("Arial", Font.BOLD, 14));
         factureTable.getTableHeader().setBackground(new Color(200, 200, 200));
         factureTable.getTableHeader().setForeground(Color.BLACK);
         factureTable.setSelectionBackground(new Color(173, 216, 230));
         factureTable.setSelectionForeground(Color.BLACK);
 
-        // Add table to a scroll pane
         JScrollPane scrollPane = new JScrollPane(factureTable);
         scrollPane.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         add(scrollPane, BorderLayout.CENTER);
@@ -103,78 +95,83 @@ public class FactureForm extends JPanel {
     }
 
     private void addFacture() {
-        String patientName = JOptionPane.showInputDialog(this, "Enter Patient Name:");
-        if (patientName == null || patientName.isEmpty()) return;
-
-        String date = JOptionPane.showInputDialog(this, "Enter Date (DD/MM/YYYY):");
-        String amountStr = JOptionPane.showInputDialog(this, "Enter Amount:");
-        String description = JOptionPane.showInputDialog(this, "Enter Description:");
-
-        double amount;
-        try {
-            amount = Double.parseDouble(amountStr);
-        } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(this, "Invalid amount. Please try again.", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
+        Facture newFacture = showFactureDialog(null, "Add Facture");
+        if (newFacture != null) {
+            newFacture.setId(factures.size() + 1);
+            factures.add(newFacture);
+            Facture.saveAllToFile(filePath, factures);
+            loadFacturesFromFile();
+            JOptionPane.showMessageDialog(this, "Facture added successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
         }
-
-        int newId = factures.size() + 1;
-        Facture newFacture = new Facture(newId, patientName, date, amount, description);
-        factures.add(newFacture);
-
-        Facture.saveAllToFile(filePath, factures);
-        loadFacturesFromFile();
-
-        JOptionPane.showMessageDialog(this, "Invoice added successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
     }
 
     private void editFacture() {
         int selectedRow = factureTable.getSelectedRow();
-        if (selectedRow == -1) {
-            JOptionPane.showMessageDialog(this, "Please select an invoice to edit.", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
+        if (selectedRow >= 0) {
+            Facture facture = factures.get(selectedRow);
+            Facture updatedFacture = showFactureDialog(facture, "Edit Facture");
+            if (updatedFacture != null) {
+                factures.set(selectedRow, updatedFacture);
+                Facture.saveAllToFile(filePath, factures);
+                loadFacturesFromFile();
+                JOptionPane.showMessageDialog(this, "Facture updated successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
+            }
+        } else {
+            JOptionPane.showMessageDialog(this, "Select a facture to edit.", "Error", JOptionPane.ERROR_MESSAGE);
         }
-
-        Facture facture = factures.get(selectedRow);
-
-        String patientName = JOptionPane.showInputDialog(this, "Edit Patient Name:", facture.getPatientName());
-        if (patientName == null || patientName.isEmpty()) return;
-
-        String date = JOptionPane.showInputDialog(this, "Edit Date (DD/MM/YYYY):", facture.getDate());
-        String amountStr = JOptionPane.showInputDialog(this, "Edit Amount:", facture.getAmount());
-        String description = JOptionPane.showInputDialog(this, "Edit Description:", facture.getDescription());
-
-        double amount;
-        try {
-            amount = Double.parseDouble(amountStr);
-        } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(this, "Invalid amount. Please try again.", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-
-        facture.setPatientName(patientName);
-        facture.setDate(date);
-        facture.setAmount(amount);
-        facture.setDescription(description);
-
-        Facture.saveAllToFile(filePath, factures);
-        loadFacturesFromFile();
-
-        JOptionPane.showMessageDialog(this, "Invoice updated successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
     }
 
     private void deleteFacture() {
         int selectedRow = factureTable.getSelectedRow();
-        if (selectedRow == -1) {
-            JOptionPane.showMessageDialog(this, "Please select an invoice to delete.", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
+        if (selectedRow >= 0) {
+            int confirm = JOptionPane.showConfirmDialog(this, "Are you sure you want to delete this facture?", "Confirm", JOptionPane.YES_NO_OPTION);
+            if (confirm == JOptionPane.YES_OPTION) {
+                factures.remove(selectedRow);
+                Facture.saveAllToFile(filePath, factures);
+                loadFacturesFromFile();
+                JOptionPane.showMessageDialog(this, "Facture deleted successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
+            }
+        } else {
+            JOptionPane.showMessageDialog(this, "Select a facture to delete.", "Error", JOptionPane.ERROR_MESSAGE);
         }
+    }
 
-        factures.remove(selectedRow);
+    private Facture showFactureDialog(Facture existingFacture, String title) {
+        JTextField txtPatientName = new JTextField(existingFacture != null ? existingFacture.getPatientName() : "");
+        JTextField txtDate = new JTextField(existingFacture != null ? existingFacture.getDate() : "");
+        JTextField txtAmount = new JTextField(existingFacture != null ? String.valueOf(existingFacture.getAmount()) : "");
+        JTextField txtDescription = new JTextField(existingFacture != null ? existingFacture.getDescription() : "");
 
-        Facture.saveAllToFile(filePath, factures);
-        loadFacturesFromFile();
+        JPanel panel = new JPanel(new GridLayout(4, 2, 10, 10));
+        panel.add(new JLabel("Patient Name:"));
+        panel.add(txtPatientName);
+        panel.add(new JLabel("Date:"));
+        panel.add(txtDate);
+        panel.add(new JLabel("Amount:"));
+        panel.add(txtAmount);
+        panel.add(new JLabel("Description:"));
+        panel.add(txtDescription);
 
-        JOptionPane.showMessageDialog(this, "Invoice deleted successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
+        int result = JOptionPane.showConfirmDialog(this, panel, title, JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+        if (result == JOptionPane.OK_OPTION) {
+            try {
+                String patientName = txtPatientName.getText();
+                String date = txtDate.getText();
+                double amount = Double.parseDouble(txtAmount.getText());
+                String description = txtDescription.getText();
+
+                if (patientName.isEmpty() || date.isEmpty() || description.isEmpty()) {
+                    throw new IllegalArgumentException("All fields are required.");
+                }
+
+                return new Facture(
+                        existingFacture != null ? existingFacture.getId() : 0,
+                        patientName, date, amount, description
+                );
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(this, "Invalid input: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+        return null;
     }
 }

@@ -21,13 +21,8 @@ public class RendezVousForm extends JPanel {
         title.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         add(title, BorderLayout.NORTH);
 
-        // Initialize Table
         setupTable();
-
-        // Initialize Buttons
         setupButtons();
-
-        // Load Appointments from File
         loadAppointmentsFromFile();
     }
 
@@ -101,65 +96,87 @@ public class RendezVousForm extends JPanel {
     }
 
     private void addAppointment() {
-        String patientName = JOptionPane.showInputDialog(this, "Enter Patient Name:");
-        if (patientName == null || patientName.isEmpty()) return;
-
-        String doctorName = JOptionPane.showInputDialog(this, "Enter Doctor Name:");
-        String date = JOptionPane.showInputDialog(this, "Enter Appointment Date (DD/MM/YYYY):");
-        String time = JOptionPane.showInputDialog(this, "Enter Appointment Time (HH:MM):");
-        String reason = JOptionPane.showInputDialog(this, "Enter Reason:");
-
-        int newId = appointments.size() + 1;
-        Appointment newAppointment = new Appointment(newId, patientName, doctorName, date, time, reason);
-        appointments.add(newAppointment);
-
-        Appointment.saveAllToFile(filePath, appointments);
-        loadAppointmentsFromFile();
-
-        JOptionPane.showMessageDialog(this, "Appointment added successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
+        Appointment newAppointment = showAppointmentDialog(null, "Add Appointment");
+        if (newAppointment != null) {
+            newAppointment.setId(appointments.size() + 1);
+            appointments.add(newAppointment);
+            Appointment.saveAllToFile(filePath, appointments);
+            loadAppointmentsFromFile();
+            JOptionPane.showMessageDialog(this, "Appointment added successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
+        }
     }
 
     private void editAppointment() {
         int selectedRow = appointmentTable.getSelectedRow();
-        if (selectedRow == -1) {
-            JOptionPane.showMessageDialog(this, "Please select an appointment to edit.", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
+        if (selectedRow >= 0) {
+            Appointment appointment = appointments.get(selectedRow);
+            Appointment updatedAppointment = showAppointmentDialog(appointment, "Edit Appointment");
+            if (updatedAppointment != null) {
+                appointments.set(selectedRow, updatedAppointment);
+                Appointment.saveAllToFile(filePath, appointments);
+                loadAppointmentsFromFile();
+                JOptionPane.showMessageDialog(this, "Appointment updated successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
+            }
+        } else {
+            JOptionPane.showMessageDialog(this, "Select an appointment to edit.", "Error", JOptionPane.ERROR_MESSAGE);
         }
-
-        Appointment appointment = appointments.get(selectedRow);
-
-        String patientName = JOptionPane.showInputDialog(this, "Edit Patient Name:", appointment.getPatientName());
-        if (patientName == null || patientName.isEmpty()) return;
-
-        String doctorName = JOptionPane.showInputDialog(this, "Edit Doctor Name:", appointment.getDoctor());
-        String date = JOptionPane.showInputDialog(this, "Edit Appointment Date (DD/MM/YYYY):", appointment.getDate());
-        String time = JOptionPane.showInputDialog(this, "Edit Appointment Time (HH:MM):", appointment.getTime());
-        String reason = JOptionPane.showInputDialog(this, "Edit Reason:", appointment.getReason());
-
-        appointment.setPatientName(patientName);
-        appointment.setDoctor(doctorName);
-        appointment.setDate(date);
-        appointment.setTime(time);
-        appointment.setReason(reason);
-
-        Appointment.saveAllToFile(filePath, appointments);
-        loadAppointmentsFromFile();
-
-        JOptionPane.showMessageDialog(this, "Appointment updated successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
     }
 
     private void deleteAppointment() {
         int selectedRow = appointmentTable.getSelectedRow();
-        if (selectedRow == -1) {
-            JOptionPane.showMessageDialog(this, "Please select an appointment to delete.", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
+        if (selectedRow >= 0) {
+            int confirm = JOptionPane.showConfirmDialog(this, "Are you sure you want to delete this appointment?", "Confirm", JOptionPane.YES_NO_OPTION);
+            if (confirm == JOptionPane.YES_OPTION) {
+                appointments.remove(selectedRow);
+                Appointment.saveAllToFile(filePath, appointments);
+                loadAppointmentsFromFile();
+                JOptionPane.showMessageDialog(this, "Appointment deleted successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
+            }
+        } else {
+            JOptionPane.showMessageDialog(this, "Select an appointment to delete.", "Error", JOptionPane.ERROR_MESSAGE);
         }
+    }
 
-        appointments.remove(selectedRow);
+    private Appointment showAppointmentDialog(Appointment existingAppointment, String title) {
+        JTextField txtPatientName = new JTextField(existingAppointment != null ? existingAppointment.getPatientName() : "");
+        JTextField txtDoctorName = new JTextField(existingAppointment != null ? existingAppointment.getDoctor() : "");
+        JTextField txtDate = new JTextField(existingAppointment != null ? existingAppointment.getDate() : "");
+        JTextField txtTime = new JTextField(existingAppointment != null ? existingAppointment.getTime() : "");
+        JTextField txtReason = new JTextField(existingAppointment != null ? existingAppointment.getReason() : "");
 
-        Appointment.saveAllToFile(filePath, appointments);
-        loadAppointmentsFromFile();
+        JPanel panel = new JPanel(new GridLayout(5, 2, 10, 10));
+        panel.add(new JLabel("Patient Name:"));
+        panel.add(txtPatientName);
+        panel.add(new JLabel("Doctor:"));
+        panel.add(txtDoctorName);
+        panel.add(new JLabel("Date:"));
+        panel.add(txtDate);
+        panel.add(new JLabel("Time:"));
+        panel.add(txtTime);
+        panel.add(new JLabel("Reason:"));
+        panel.add(txtReason);
 
-        JOptionPane.showMessageDialog(this, "Appointment deleted successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
+        int result = JOptionPane.showConfirmDialog(this, panel, title, JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+        if (result == JOptionPane.OK_OPTION) {
+            try {
+                String patientName = txtPatientName.getText();
+                String doctorName = txtDoctorName.getText();
+                String date = txtDate.getText();
+                String time = txtTime.getText();
+                String reason = txtReason.getText();
+
+                if (patientName.isEmpty() || doctorName.isEmpty() || date.isEmpty() || time.isEmpty() || reason.isEmpty()) {
+                    throw new IllegalArgumentException("All fields are required.");
+                }
+
+                return new Appointment(
+                        existingAppointment != null ? existingAppointment.getId() : 0,
+                        patientName, doctorName, date, time, reason
+                );
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(this, "Invalid input: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+        return null;
     }
 }

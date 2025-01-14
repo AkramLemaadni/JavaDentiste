@@ -15,7 +15,7 @@ public class DoctorForm extends JPanel {
     public DoctorForm() {
         setLayout(new BorderLayout());
 
-        JLabel title = new JLabel("Docteur", JLabel.CENTER);
+        JLabel title = new JLabel("Doctors", JLabel.CENTER);
         title.setFont(new Font("Arial", Font.BOLD, 26));
         title.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         add(title, BorderLayout.NORTH);
@@ -93,56 +93,83 @@ public class DoctorForm extends JPanel {
     }
 
     private void addDoctor() {
-        String name = JOptionPane.showInputDialog(this, "Enter Doctor's Name:");
-        if (name == null || name.isEmpty()) return;
-
-        String specialization = JOptionPane.showInputDialog(this, "Enter Specialization:");
-        String phone = JOptionPane.showInputDialog(this, "Enter Phone Number:");
-        String email = JOptionPane.showInputDialog(this, "Enter Email Address:");
-
-        int newId = doctors.size() + 1;
-        Doctor newDoctor = new Doctor(newId, name, specialization, phone, email);
-        doctors.add(newDoctor);
-
-        Doctor.saveAllToFile(filePath, doctors);
-        loadDoctorsFromFile();
-        JOptionPane.showMessageDialog(this, "Doctor added successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
+        Doctor newDoctor = showDoctorDialog(null, "Add Doctor");
+        if (newDoctor != null) {
+            newDoctor.setId(doctors.size() + 1);
+            doctors.add(newDoctor);
+            Doctor.saveAllToFile(filePath, doctors);
+            loadDoctorsFromFile();
+            JOptionPane.showMessageDialog(this, "Doctor added successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
+        }
     }
 
     private void editDoctor() {
         int selectedRow = doctorTable.getSelectedRow();
-        if (selectedRow == -1) {
-            JOptionPane.showMessageDialog(this, "Please select a doctor to edit.", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
+        if (selectedRow >= 0) {
+            Doctor doctor = doctors.get(selectedRow);
+            Doctor updatedDoctor = showDoctorDialog(doctor, "Edit Doctor");
+            if (updatedDoctor != null) {
+                doctors.set(selectedRow, updatedDoctor);
+                Doctor.saveAllToFile(filePath, doctors);
+                loadDoctorsFromFile();
+                JOptionPane.showMessageDialog(this, "Doctor updated successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
+            }
+        } else {
+            JOptionPane.showMessageDialog(this, "Select a doctor to edit.", "Error", JOptionPane.ERROR_MESSAGE);
         }
-
-        Doctor doctor = doctors.get(selectedRow);
-
-        String name = JOptionPane.showInputDialog(this, "Edit Doctor's Name:", doctor.getName());
-        String specialization = JOptionPane.showInputDialog(this, "Edit Specialization:", doctor.getSpecialization());
-        String phone = JOptionPane.showInputDialog(this, "Edit Phone Number:", doctor.getPhone());
-        String email = JOptionPane.showInputDialog(this, "Edit Email Address:", doctor.getEmail());
-
-        doctor.setName(name);
-        doctor.setSpecialization(specialization);
-        doctor.setPhone(phone);
-        doctor.setEmail(email);
-
-        Doctor.saveAllToFile(filePath, doctors);
-        loadDoctorsFromFile();
-        JOptionPane.showMessageDialog(this, "Doctor updated successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
     }
 
     private void deleteDoctor() {
         int selectedRow = doctorTable.getSelectedRow();
-        if (selectedRow == -1) {
-            JOptionPane.showMessageDialog(this, "Please select a doctor to delete.", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
+        if (selectedRow >= 0) {
+            int confirm = JOptionPane.showConfirmDialog(this, "Are you sure you want to delete this doctor?", "Confirm", JOptionPane.YES_NO_OPTION);
+            if (confirm == JOptionPane.YES_OPTION) {
+                doctors.remove(selectedRow);
+                Doctor.saveAllToFile(filePath, doctors);
+                loadDoctorsFromFile();
+                JOptionPane.showMessageDialog(this, "Doctor deleted successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
+            }
+        } else {
+            JOptionPane.showMessageDialog(this, "Select a doctor to delete.", "Error", JOptionPane.ERROR_MESSAGE);
         }
+    }
 
-        doctors.remove(selectedRow);
-        Doctor.saveAllToFile(filePath, doctors);
-        loadDoctorsFromFile();
-        JOptionPane.showMessageDialog(this, "Doctor deleted successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
+    private Doctor showDoctorDialog(Doctor existingDoctor, String title) {
+        JTextField txtName = new JTextField(existingDoctor != null ? existingDoctor.getName() : "");
+        JTextField txtSpecialization = new JTextField(existingDoctor != null ? existingDoctor.getSpecialization() : "");
+        JTextField txtPhone = new JTextField(existingDoctor != null ? existingDoctor.getPhone() : "");
+        JTextField txtEmail = new JTextField(existingDoctor != null ? existingDoctor.getEmail() : "");
+
+        JPanel panel = new JPanel(new GridLayout(4, 2, 10, 10));
+        panel.add(new JLabel("Name:"));
+        panel.add(txtName);
+        panel.add(new JLabel("Specialization:"));
+        panel.add(txtSpecialization);
+        panel.add(new JLabel("Phone:"));
+        panel.add(txtPhone);
+        panel.add(new JLabel("Email:"));
+        panel.add(txtEmail);
+
+        int result = JOptionPane.showConfirmDialog(this, panel, title, JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+        if (result == JOptionPane.OK_OPTION) {
+            try {
+                String name = txtName.getText();
+                String specialization = txtSpecialization.getText();
+                String phone = txtPhone.getText();
+                String email = txtEmail.getText();
+
+                if (name.isEmpty() || specialization.isEmpty() || phone.isEmpty() || email.isEmpty()) {
+                    throw new IllegalArgumentException("All fields are required.");
+                }
+
+                return new Doctor(
+                        existingDoctor != null ? existingDoctor.getId() : 0,
+                        name, specialization, phone, email
+                );
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(this, "Invalid input: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+        return null;
     }
 }

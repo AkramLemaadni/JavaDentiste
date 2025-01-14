@@ -2,6 +2,7 @@ package raven.application.form;
 
 import Doctor.DoctorForm;
 import Facture.FactureForm;
+import Infermier.InfermierForm;
 import RendezVous.RendezVousForm;
 import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.extras.FlatSVGIcon;
@@ -92,7 +93,15 @@ public class MainForm extends JLayeredPane {
                     }
                     break;
 
-                case 2: // Rendez-vous
+                case 2: // Docteur
+                    Application.showForm(new DoctorForm()); // Replace with your Doctor form
+                    break;
+
+                case 3: //Infermier
+                    Application.showForm(new InfermierForm());
+                    break;
+
+                case 4: // Rendez-vous
                     if (subIndex == 0) { // Assuming "Rendez-vous" has no sub-menu
                         Application.showForm(new RendezVousForm()); // Replace with your Rendez-vous form
                     } else {
@@ -100,15 +109,11 @@ public class MainForm extends JLayeredPane {
                     }
                     break;
 
-                case 3: // Docteur
-                    Application.showForm(new DoctorForm()); // Replace with your Doctor form
-                    break;
-
-                case 4: // Facture
+                case 5: // Facture
                     Application.showForm(new FactureForm()); // Replace with your Facture form
                     break;
 
-                case 5: // Logout
+                case 6: // Logout
                     Application.logout();
                     break;
 

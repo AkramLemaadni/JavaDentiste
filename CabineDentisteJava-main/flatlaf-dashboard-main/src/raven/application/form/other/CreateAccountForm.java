@@ -19,11 +19,28 @@ public class CreateAccountForm extends JPanel {
         setLayout(new BorderLayout(20, 20));
         setBorder(BorderFactory.createEmptyBorder(20, 40, 20, 40));
 
-        // Title Panel
+        // Top Panel with "Retour" Button
+        JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        JButton btnBack = new JButton("Retour");
+        btnBack.setFont(new Font("Arial", Font.PLAIN, 14));
+        btnBack.setFocusPainted(false);
+        btnBack.setBackground(new Color(46, 80, 119));
+        btnBack.setForeground(Color.WHITE);
+        btnBack.setPreferredSize(new Dimension(100, 40));
+
+        // Action listener to go back to the login form
+        btnBack.addActionListener(e -> Application.showForm(new LoginForm()));
+
+        topPanel.add(btnBack);
+        topPanel.setOpaque(false); // Ensure the panel background blends with the form
+        add(topPanel, BorderLayout.NORTH);
+
+        // Center Panel to combine title and form
+        JPanel centerPanel = new JPanel(new BorderLayout(10, 10));
         JLabel lblTitle = new JLabel("Créer un Nouveau Compte", JLabel.CENTER);
         lblTitle.setFont(new Font("Arial", Font.BOLD, 20));
         lblTitle.setForeground(new Color(46, 80, 119));
-        add(lblTitle, BorderLayout.NORTH);
+        centerPanel.add(lblTitle, BorderLayout.NORTH);
 
         // Form Panel
         JPanel formPanel = new JPanel(new GridBagLayout());
@@ -82,7 +99,8 @@ public class CreateAccountForm extends JPanel {
         JPasswordField txtPassword = new JPasswordField(20);
         formPanel.add(txtPassword, gbc);
 
-        add(formPanel, BorderLayout.CENTER);
+        centerPanel.add(formPanel, BorderLayout.CENTER);
+        add(centerPanel, BorderLayout.CENTER);
 
         // Button Panel
         JPanel buttonPanel = new JPanel();
@@ -96,7 +114,7 @@ public class CreateAccountForm extends JPanel {
 
         add(buttonPanel, BorderLayout.SOUTH);
 
-        // Action Listener for Button
+        // Action Listener for Save Button
         btnSave.addActionListener(e -> {
             String name = txtName.getText();
             String phone = txtPhone.getText();
