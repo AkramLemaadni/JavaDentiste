@@ -16,7 +16,7 @@ public class FactureForm extends JPanel {
         setLayout(new BorderLayout());
 
         // Add Title
-        JLabel title = new JLabel("Factures", JLabel.CENTER);
+        JLabel title = new JLabel("Gestion des Factures", JLabel.CENTER);
         title.setFont(new Font("Arial", Font.BOLD, 26));
         title.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         add(title, BorderLayout.NORTH);
@@ -140,7 +140,10 @@ public class FactureForm extends JPanel {
         JTextField txtPatientName = new JTextField(existingFacture != null ? existingFacture.getPatientName() : "");
         JTextField txtDate = new JTextField(existingFacture != null ? existingFacture.getDate() : "");
         JTextField txtAmount = new JTextField(existingFacture != null ? String.valueOf(existingFacture.getAmount()) : "");
-        JTextField txtDescription = new JTextField(existingFacture != null ? existingFacture.getDescription() : "");
+        JComboBox<String> cmbDescription = new JComboBox<>(new String[]{"Payéé", "Non Payéé"});
+        if (existingFacture != null) {
+            cmbDescription.setSelectedItem(existingFacture.getDescription());
+        }
 
         JPanel panel = new JPanel(new GridLayout(4, 2, 10, 10));
         panel.add(new JLabel("Patient Name:"));
@@ -150,7 +153,7 @@ public class FactureForm extends JPanel {
         panel.add(new JLabel("Amount:"));
         panel.add(txtAmount);
         panel.add(new JLabel("Description:"));
-        panel.add(txtDescription);
+        panel.add(cmbDescription);
 
         int result = JOptionPane.showConfirmDialog(this, panel, title, JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
         if (result == JOptionPane.OK_OPTION) {
@@ -158,7 +161,7 @@ public class FactureForm extends JPanel {
                 String patientName = txtPatientName.getText();
                 String date = txtDate.getText();
                 double amount = Double.parseDouble(txtAmount.getText());
-                String description = txtDescription.getText();
+                String description = (String) cmbDescription.getSelectedItem();
 
                 if (patientName.isEmpty() || date.isEmpty() || description.isEmpty()) {
                     throw new IllegalArgumentException("All fields are required.");

@@ -11,14 +11,16 @@ public class Appointment {
     private String date;
     private String time;
     private String reason;
+    private String status;
 
-    public Appointment(int id, String patientName, String doctor, String date, String time, String reason) {
+    public Appointment(int id, String patientName, String doctor, String date, String time, String reason, String status) {
         this.id = id;
         this.patientName = patientName;
         this.doctor = doctor;
         this.date = date;
         this.time = time;
         this.reason = reason;
+        this.status = status;
     }
 
     // Getters and Setters
@@ -70,10 +72,16 @@ public class Appointment {
         this.reason = reason;
     }
 
+    public String getStatus() {
+        return status;
+    }
+    public void setStatus(String status) {
+        this.status = status;
+    }
     // Convert Appointment to a CSV-like string
     @Override
     public String toString() {
-        return id + "," + patientName + "," + doctor + "," + date + "," + time + "," + reason;
+        return id + "," + patientName + "," + doctor + "," + date + "," + time + "," + reason + "," + status;
     }
 
     // Convert a CSV-like string to an Appointment object
@@ -85,7 +93,8 @@ public class Appointment {
                 parts[2],
                 parts[3],
                 parts[4],
-                parts[5]
+                parts[5],
+                parts[6]
         );
     }
 

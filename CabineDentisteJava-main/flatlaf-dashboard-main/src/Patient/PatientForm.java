@@ -3,6 +3,8 @@ package Patient;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 public class PatientForm extends JPanel {
@@ -16,7 +18,7 @@ public class PatientForm extends JPanel {
         setLayout(new BorderLayout());
 
         // Add Title
-        JLabel title = new JLabel("Patients", JLabel.CENTER);
+        JLabel title = new JLabel("Gestion des Patients", JLabel.CENTER);
         title.setFont(new Font("Arial", Font.BOLD, 26));
         title.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         add(title, BorderLayout.NORTH);
@@ -32,7 +34,7 @@ public class PatientForm extends JPanel {
     }
 
     private void setupTable() {
-        String[] columns = {"ID", "Name", "Email", "Phone", "Address", "Date of Birth", "Medical History"};
+        String[] columns = {"ID", "Name", "Email", "Phone", "Address", "Date of Birth", "Medical History", "Date Added"};
         tableModel = new DefaultTableModel(columns, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -96,7 +98,8 @@ public class PatientForm extends JPanel {
                     patient.getPhone(),
                     patient.getAddress(),
                     patient.getDateOfBirth(),
-                    patient.getMedicalHistory()
+                    patient.getMedicalHistory(),
+                    patient.getDateAdded()
             });
         }
     }
@@ -105,6 +108,7 @@ public class PatientForm extends JPanel {
         Patient newPatient = showPatientDialog(null, "Add Patient");
         if (newPatient != null) {
             newPatient.setId(patients.size() + 1);
+            newPatient.setDateAdded(LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))); // Set today's date
             patients.add(newPatient);
             Patient.saveAllToFile(filePath, patients);
             loadPatientsFromFile();
@@ -118,6 +122,7 @@ public class PatientForm extends JPanel {
             Patient patient = patients.get(selectedRow);
             Patient updatedPatient = showPatientDialog(patient, "Edit Patient");
             if (updatedPatient != null) {
+                updatedPatient.setDateAdded(patient.getDateAdded()); // Keep the original dateAdded
                 patients.set(selectedRow, updatedPatient);
                 Patient.saveAllToFile(filePath, patients);
                 loadPatientsFromFile();
@@ -181,7 +186,7 @@ public class PatientForm extends JPanel {
 
                 return new Patient(
                         existingPatient != null ? existingPatient.getId() : 0,
-                        name, email, phone, address, dob, history
+                        name, email, phone, address, dob, history, existingPatient != null ? existingPatient.getDateAdded() : ""
                 );
             } catch (Exception e) {
                 JOptionPane.showMessageDialog(this, "Invalid input: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);

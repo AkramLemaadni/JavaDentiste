@@ -1,1 +1,3 @@
-1,Said Titi,saidtiti000@gmail.com,0679497617,N 25 Agdal,07/11/2002,hh
+1,Said Titi,said000@gmail.com,0679461346,N 20 Agdal Rabat,2002-11-07,hh,2025-01-14
+2,Simo Elhihi,elhihi@outlook.com,0764916494,N 25 Temara,2003-07-25,ll,2025-01-14
+3,Oussama Bella,bella@hotmail.fr,0679146794,N 120 Taourirt,2003-12-24,oo,2025-01-14

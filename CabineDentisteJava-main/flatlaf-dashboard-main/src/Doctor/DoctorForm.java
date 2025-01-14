@@ -15,7 +15,7 @@ public class DoctorForm extends JPanel {
     public DoctorForm() {
         setLayout(new BorderLayout());
 
-        JLabel title = new JLabel("Doctors", JLabel.CENTER);
+        JLabel title = new JLabel("Gestion des Doctors", JLabel.CENTER);
         title.setFont(new Font("Arial", Font.BOLD, 26));
         title.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         add(title, BorderLayout.NORTH);

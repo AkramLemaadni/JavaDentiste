@@ -16,7 +16,7 @@ public class RendezVousForm extends JPanel {
         setLayout(new BorderLayout());
 
         // Add Title
-        JLabel title = new JLabel("Rendez-Vous", JLabel.CENTER);
+        JLabel title = new JLabel("Gestion des Rendez-Vous", JLabel.CENTER);
         title.setFont(new Font("Arial", Font.BOLD, 26));
         title.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         add(title, BorderLayout.NORTH);
@@ -27,7 +27,7 @@ public class RendezVousForm extends JPanel {
     }
 
     private void setupTable() {
-        String[] columns = {"ID", "Patient Name", "Doctor", "Date", "Time", "Reason"};
+        String[] columns = {"ID", "Patient Name", "Doctor", "Date", "Time", "Reason", "Status"};
         tableModel = new DefaultTableModel(columns, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -90,7 +90,8 @@ public class RendezVousForm extends JPanel {
                     appointment.getDoctor(),
                     appointment.getDate(),
                     appointment.getTime(),
-                    appointment.getReason()
+                    appointment.getReason(),
+                    appointment.getStatus()
             });
         }
     }
@@ -143,8 +144,12 @@ public class RendezVousForm extends JPanel {
         JTextField txtDate = new JTextField(existingAppointment != null ? existingAppointment.getDate() : "");
         JTextField txtTime = new JTextField(existingAppointment != null ? existingAppointment.getTime() : "");
         JTextField txtReason = new JTextField(existingAppointment != null ? existingAppointment.getReason() : "");
+        JComboBox<String> cmbStatus = new JComboBox<>(new String[]{"Complété", "En attente", "Annulé"});
+        if (existingAppointment != null) {
+            cmbStatus.setSelectedItem(existingAppointment.getStatus());
+        }
 
-        JPanel panel = new JPanel(new GridLayout(5, 2, 10, 10));
+        JPanel panel = new JPanel(new GridLayout(6, 2, 10, 10));
         panel.add(new JLabel("Patient Name:"));
         panel.add(txtPatientName);
         panel.add(new JLabel("Doctor:"));
@@ -155,6 +160,8 @@ public class RendezVousForm extends JPanel {
         panel.add(txtTime);
         panel.add(new JLabel("Reason:"));
         panel.add(txtReason);
+        panel.add(new JLabel("Status:"));
+        panel.add(cmbStatus);
 
         int result = JOptionPane.showConfirmDialog(this, panel, title, JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
         if (result == JOptionPane.OK_OPTION) {
@@ -164,6 +171,7 @@ public class RendezVousForm extends JPanel {
                 String date = txtDate.getText();
                 String time = txtTime.getText();
                 String reason = txtReason.getText();
+                String status = (String) cmbStatus.getSelectedItem();
 
                 if (patientName.isEmpty() || doctorName.isEmpty() || date.isEmpty() || time.isEmpty() || reason.isEmpty()) {
                     throw new IllegalArgumentException("All fields are required.");
@@ -171,7 +179,7 @@ public class RendezVousForm extends JPanel {
 
                 return new Appointment(
                         existingAppointment != null ? existingAppointment.getId() : 0,
-                        patientName, doctorName, date, time, reason
+                        patientName, doctorName, date, time, reason, status
                 );
             } catch (Exception e) {
                 JOptionPane.showMessageDialog(this, "Invalid input: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);

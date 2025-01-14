@@ -13,8 +13,9 @@ public class Patient {
     private String address;
     private String dateOfBirth; // Date of birth for the patient
     private String medicalHistory; // Medical history summary
+    private String dateAdded; // Date added in YYYY-MM-DD format
 
-    public Patient(int id, String name, String email, String phone, String address, String dateOfBirth, String medicalHistory) {
+    public Patient(int id, String name, String email, String phone, String address, String dateOfBirth, String medicalHistory, String dateAdded) {
         this.id = id;
         this.name = name;
         this.email = email;
@@ -22,34 +23,31 @@ public class Patient {
         this.address = address;
         this.dateOfBirth = dateOfBirth;
         this.medicalHistory = medicalHistory;
+        this.dateAdded = dateAdded;
     }
 
     // Getters and Setters
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
-
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
-
     public String getEmail() { return email; }
     public void setEmail(String email) { this.email = email; }
-
     public String getPhone() { return phone; }
     public void setPhone(String phone) { this.phone = phone; }
-
     public String getAddress() { return address; }
     public void setAddress(String address) { this.address = address; }
-
     public String getDateOfBirth() { return dateOfBirth; }
     public void setDateOfBirth(String dateOfBirth) { this.dateOfBirth = dateOfBirth; }
-
     public String getMedicalHistory() { return medicalHistory; }
     public void setMedicalHistory(String medicalHistory) { this.medicalHistory = medicalHistory; }
+    public String getDateAdded() { return dateAdded; }
+    public void setDateAdded(String dateAdded) { this.dateAdded = dateAdded; }
 
     // Convert Patient to a CSV-like string
     @Override
     public String toString() {
-        return id + "," + name + "," + email + "," + phone + "," + address + "," + dateOfBirth + "," + medicalHistory;
+        return id + "," + name + "," + email + "," + phone + "," + address + "," + dateOfBirth + "," + medicalHistory + "," + dateAdded;
     }
 
     // Convert a CSV-like string to a Patient object
@@ -62,7 +60,8 @@ public class Patient {
                 parts[3],
                 parts[4],
                 parts[5],
-                parts[6]
+                parts[6],
+                parts[7]
         );
     }
 

@@ -1,5 +1,8 @@
 package raven.application.form.other;
 
+import Facture.Facture;
+import Patient.Patient;
+import RendezVous.Appointment;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
@@ -8,6 +11,9 @@ import org.jfree.data.general.DefaultPieDataset;
 
 import javax.swing.*;
 import java.awt.*;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 public class FormDashboard extends JPanel {
 
@@ -21,16 +27,14 @@ public class FormDashboard extends JPanel {
         add(title, BorderLayout.NORTH);
 
         // Main content area
-        JPanel contentPanel = new JPanel(new GridLayout(2, 2, 10, 10));
+        JPanel contentPanel = new JPanel(new GridLayout(2, 1, 10, 10)); // 2 rows for charts
         contentPanel.setBackground(getBackground());
         contentPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
         add(contentPanel, BorderLayout.CENTER);
 
-        // Add charts
+        // Add both charts
         contentPanel.add(createBarChartPanel());
         contentPanel.add(createPieChartPanel());
-        /*contentPanel.add(createPlaceholderChartPanel("Factures"));
-        contentPanel.add(createPlaceholderChartPanel("Rendez-vous"));*/
 
         // Stats panel
         add(createStatsPanel(), BorderLayout.SOUTH);
@@ -38,91 +42,111 @@ public class FormDashboard extends JPanel {
 
     private JPanel createBarChartPanel() {
         // Data for bar chart
+        int[] patientPerMonth = calculatePatientPerMonth();
         DefaultCategoryDataset dataset = new DefaultCategoryDataset();
-        dataset.addValue(100, "Patients", "Janvier");
-        dataset.addValue(170, "Patients", "Février");
-        dataset.addValue(300, "Patients", "Mars");
-        dataset.addValue(180, "Patients", "Avril");
-        dataset.addValue(198, "Patients", "Mai");
-        dataset.addValue(175, "Patients", "Juin");
-        dataset.addValue(250, "Patients", "Juillet");
-        dataset.addValue(50, "Patients", "Aout");
-        dataset.addValue(40, "Patients", "Septembre");
-        dataset.addValue(30, "Patients", "Octobre");
-        dataset.addValue(50, "Patients", "Novembre");
-        dataset.addValue(30, "Patients", "Decembre");
+
+        String[] months = {
+                "Janvier", "Février", "Mars", "Avril", "Mai", "Juin",
+                "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"
+        };
+
+        for (int i = 0; i < 12; i++) {
+            dataset.addValue(patientPerMonth[i], "Patients", months[i]);
+        }
 
         // Create bar chart
         JFreeChart chart = ChartFactory.createBarChart(
-                "Nombre des patients pour mois",
+                "Nombre des Patients par Mois",
                 "Mois",
-                "Nombre des patients",
+                "Nombre des Patients",
                 dataset
         );
 
-        // Customize chart
-        //chart.setBackgroundPaint(getBackground());
-        chart.getTitle().setPaint(Color.WHITE);
-
         // Wrap chart in a panel
         ChartPanel chartPanel = new ChartPanel(chart);
-        chartPanel.setPreferredSize(new Dimension(200, 300));
-        chartPanel.setBackground(new Color(30, 30, 30));
+        chartPanel.setPreferredSize(new Dimension(800, 400));
 
         return chartPanel;
     }
 
     private JPanel createPieChartPanel() {
         // Data for pie chart
-        DefaultPieDataset dataset = new DefaultPieDataset();
-        dataset.setValue("Complété", 40);
-        dataset.setValue("En attente", 30);
-        dataset.setValue("Annulé", 30);
+        DefaultPieDataset dataset = calculateAppointmentStatus();
 
         // Create pie chart
         JFreeChart chart = ChartFactory.createPieChart(
-                "Distribution des Rendez-vous",
+                "Statut des Rendez-vous",
                 dataset,
                 true, // legend
                 true, // tooltips
                 false // URLs
         );
 
-        // Customize chart
-        //chart.setBackgroundPaint(getBackground());
-        chart.getTitle().setPaint(Color.WHITE);
-
         // Wrap chart in a panel
         ChartPanel chartPanel = new ChartPanel(chart);
-        chartPanel.setPreferredSize(new Dimension(400, 300));
-        chartPanel.setBackground(new Color(30, 30, 30));
+        chartPanel.setPreferredSize(new Dimension(800, 400));
 
         return chartPanel;
     }
 
-    /*private JPanel createPlaceholderChartPanel(String title) {
-        JPanel panel = new JPanel();
-        panel.setLayout(new BorderLayout());
-        panel.setBackground(new Color(40, 40, 40));
-        panel.setBorder(BorderFactory.createLineBorder(new Color(54, 162, 235)));
+    private int[] calculatePatientPerMonth() {
+        int[] patientCount = new int[12]; // Array to hold the count for each month
+        List<Patient> patients = Patient.loadFromFile("C:\\Users\\Admin\\Desktop\\CabineDentisteJava-main\\CabineDentisteJava-main\\flatlaf-dashboard-main\\data\\patients.txt");
 
-        JLabel label = new JLabel(title, SwingConstants.CENTER);
-        label.setFont(new Font("Segoe UI", Font.BOLD, 16));
-        label.setForeground(Color.WHITE);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
-        panel.add(label, BorderLayout.CENTER);
-        return panel;
-    }*/
+        for (Patient patient : patients) {
+            try {
+                LocalDate dateAdded = LocalDate.parse(patient.getDateAdded(), formatter);
+                int monthIndex = dateAdded.getMonthValue() - 1; // Month is 1-based
+                patientCount[monthIndex]++;
+            } catch (Exception e) {
+                System.out.println("Invalid date format for patient: " + patient.getName());
+            }
+        }
+
+        return patientCount;
+    }
+
+    private DefaultPieDataset calculateAppointmentStatus() {
+        DefaultPieDataset dataset = new DefaultPieDataset();
+        List<Appointment> appointments = Appointment.loadFromFile("C:\\Users\\Admin\\Desktop\\CabineDentisteJava-main\\CabineDentisteJava-main\\flatlaf-dashboard-main\\data\\appointments.txt");
+
+        int completed = 0;
+        int pending = 0;
+        int canceled = 0;
+
+        for (Appointment appointment : appointments) {
+            String status = appointment.getStatus().toLowerCase();
+            switch (status) {
+                case "complété":
+                    completed++;
+                    break;
+                case "en attente":
+                    pending++;
+                    break;
+                case "annulé":
+                    canceled++;
+                    break;
+            }
+        }
+
+        dataset.setValue("Complété", completed);
+        dataset.setValue("En attente", pending);
+        dataset.setValue("Annulé", canceled);
+
+        return dataset;
+    }
 
     private JPanel createStatsPanel() {
         JPanel statsPanel = new JPanel(new GridLayout(1, 3, 10, 10));
         statsPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-        //statsPanel.setBackground(new Color(30, 30, 30));
 
         // Add stat cards
-        statsPanel.add(createStatCard("Total des Patients", "120", new Color(46, 204, 113)));
-        statsPanel.add(createStatCard("Taux de croissance", "15%", new Color(52, 152, 219)));
-        statsPanel.add(createStatCard("Revenu mensuel", "5000Dh", new Color(231, 76, 60)));
+        statsPanel.add(createStatCard("Total des Patients", String.valueOf(calculateTotalPatients()), new Color(46, 204, 113)));
+        statsPanel.add(createStatCard("Total des Rendez-vous", String.valueOf(calculateTotalAppointments()), new Color(52, 152, 219)));
+        statsPanel.add(createStatCard("Montant Total des Factures Payéé", calculateMontantTotal() + " Dh", new Color(231, 76, 60)));
+
 
         return statsPanel;
     }
@@ -144,5 +168,23 @@ public class FormDashboard extends JPanel {
         card.add(valueLabel, BorderLayout.CENTER);
 
         return card;
+    }
+
+    private int calculateTotalPatients() {
+        List<Patient> patients = Patient.loadFromFile("C:\\Users\\Admin\\Desktop\\CabineDentisteJava-main\\CabineDentisteJava-main\\flatlaf-dashboard-main\\data\\patients.txt");
+        return patients.size();
+    }
+
+    private int calculateTotalAppointments() {
+        List<Appointment> appointments = Appointment.loadFromFile("C:\\Users\\Admin\\Desktop\\CabineDentisteJava-main\\CabineDentisteJava-main\\flatlaf-dashboard-main\\data\\appointments.txt");
+        return appointments.size();
+    }
+
+    private double calculateMontantTotal() {
+        List<Facture> factures = Facture.loadFromFile("C:\\Users\\Admin\\Desktop\\CabineDentisteJava-main\\CabineDentisteJava-main\\flatlaf-dashboard-main\\data\\factures.txt");
+        return factures.stream()
+                .filter(facture -> facture.getDescription().equalsIgnoreCase("Payéé")) // Only include paid invoices
+                .mapToDouble(Facture::getAmount) // Map to amounts
+                .sum(); // Sum up the amounts
     }
 }
