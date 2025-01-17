@@ -1,3 +1,1 @@
-1,Simo Elhihi,2025-01-15,250.0,Payéé
-2,Oussama Bella,2025-01-14,1000.0,Non Payéé
-3,Said Titi,2025-01-20,600.0,Payéé
+1,Said Titi,2025-01-18,600.0,Non Payéé,300.0,300.0

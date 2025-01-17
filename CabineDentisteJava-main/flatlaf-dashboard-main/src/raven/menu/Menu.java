@@ -31,6 +31,7 @@ public class Menu extends JPanel {
             {"DOCTEUR"},
             {"INFERMIER"},
         {"RENDEZ-VOUS"},
+            {"DOSSIER MEDICALE"},
             {"FACTURE"},
         {"DECONNEXION"}
     };

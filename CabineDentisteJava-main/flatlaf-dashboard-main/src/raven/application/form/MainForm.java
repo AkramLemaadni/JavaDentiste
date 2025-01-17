@@ -4,6 +4,7 @@ import Doctor.DoctorForm;
 import Facture.FactureForm;
 import Infermier.InfermierForm;
 import RendezVous.RendezVousForm;
+import DossierMedicale.DossierMedicaleForm;
 import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.extras.FlatSVGIcon;
 import com.formdev.flatlaf.util.UIScale;
@@ -108,12 +109,18 @@ public class MainForm extends JLayeredPane {
                         action.cancel();
                     }
                     break;
-
-                case 5: // Facture
+                case 5: // DOSSIER MEDICALE
+                    if (subIndex == 0) { // Assuming "Dossier Medicale" has no sub-menu
+                        Application.showForm(new DossierMedicaleForm()); // Replace with your Dossier Medicale form
+                    } else {
+                        action.cancel();
+                    }
+                    break;
+                case 6: // Facture
                     Application.showForm(new FactureForm()); // Replace with your Facture form
                     break;
 
-                case 6: // Logout
+                case 7: // Logout
                     Application.logout();
                     break;
 

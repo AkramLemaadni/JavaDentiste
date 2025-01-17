@@ -3,6 +3,8 @@ package RendezVous;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.io.*;
+import java.util.ArrayList;
 import java.util.List;
 
 public class RendezVousForm extends JPanel {
@@ -10,7 +12,8 @@ public class RendezVousForm extends JPanel {
     private DefaultTableModel tableModel;
     private JTable appointmentTable;
     private List<Appointment> appointments;
-    private final String filePath = "C:\\Users\\Admin\\Desktop\\CabineDentisteJava-main\\CabineDentisteJava-main\\flatlaf-dashboard-main\\data\\appointments.txt";
+    private final String appointmentsFilePath = "C:\\Users\\Admin\\Desktop\\CabineDentisteJava-main\\CabineDentisteJava-main\\flatlaf-dashboard-main\\data\\appointments.txt";
+    private final String patientsFilePath = "C:\\Users\\Admin\\Desktop\\CabineDentisteJava-main\\CabineDentisteJava-main\\flatlaf-dashboard-main\\data\\patients.txt";
 
     public RendezVousForm() {
         setLayout(new BorderLayout());
@@ -81,7 +84,7 @@ public class RendezVousForm extends JPanel {
     }
 
     private void loadAppointmentsFromFile() {
-        appointments = Appointment.loadFromFile(filePath);
+        appointments = Appointment.loadFromFile(appointmentsFilePath);
         tableModel.setRowCount(0);
         for (Appointment appointment : appointments) {
             tableModel.addRow(new Object[]{
@@ -96,12 +99,28 @@ public class RendezVousForm extends JPanel {
         }
     }
 
+    private List<String> loadPatientNames() {
+        List<String> patientNames = new ArrayList<>();
+        try (BufferedReader reader = new BufferedReader(new FileReader(patientsFilePath))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.split(",");
+                if (parts.length > 1) {
+                    patientNames.add(parts[1]); // Assuming the name is in the second column
+                }
+            }
+        } catch (IOException e) {
+            JOptionPane.showMessageDialog(this, "Error reading patients file: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
+        return patientNames;
+    }
+
     private void addAppointment() {
         Appointment newAppointment = showAppointmentDialog(null, "Add Appointment");
         if (newAppointment != null) {
             newAppointment.setId(appointments.size() + 1);
             appointments.add(newAppointment);
-            Appointment.saveAllToFile(filePath, appointments);
+            Appointment.saveAllToFile(appointmentsFilePath, appointments);
             loadAppointmentsFromFile();
             JOptionPane.showMessageDialog(this, "Appointment added successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
         }
@@ -114,7 +133,7 @@ public class RendezVousForm extends JPanel {
             Appointment updatedAppointment = showAppointmentDialog(appointment, "Edit Appointment");
             if (updatedAppointment != null) {
                 appointments.set(selectedRow, updatedAppointment);
-                Appointment.saveAllToFile(filePath, appointments);
+                Appointment.saveAllToFile(appointmentsFilePath, appointments);
                 loadAppointmentsFromFile();
                 JOptionPane.showMessageDialog(this, "Appointment updated successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
             }
@@ -129,7 +148,7 @@ public class RendezVousForm extends JPanel {
             int confirm = JOptionPane.showConfirmDialog(this, "Are you sure you want to delete this appointment?", "Confirm", JOptionPane.YES_NO_OPTION);
             if (confirm == JOptionPane.YES_OPTION) {
                 appointments.remove(selectedRow);
-                Appointment.saveAllToFile(filePath, appointments);
+                Appointment.saveAllToFile(appointmentsFilePath, appointments);
                 loadAppointmentsFromFile();
                 JOptionPane.showMessageDialog(this, "Appointment deleted successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
             }
@@ -139,7 +158,12 @@ public class RendezVousForm extends JPanel {
     }
 
     private Appointment showAppointmentDialog(Appointment existingAppointment, String title) {
-        JTextField txtPatientName = new JTextField(existingAppointment != null ? existingAppointment.getPatientName() : "");
+        List<String> patientNames = loadPatientNames();
+        JComboBox<String> cmbPatientName = new JComboBox<>(patientNames.toArray(new String[0]));
+        if (existingAppointment != null) {
+            cmbPatientName.setSelectedItem(existingAppointment.getPatientName());
+        }
+
         JTextField txtDoctorName = new JTextField(existingAppointment != null ? existingAppointment.getDoctor() : "");
         JTextField txtDate = new JTextField(existingAppointment != null ? existingAppointment.getDate() : "");
         JTextField txtTime = new JTextField(existingAppointment != null ? existingAppointment.getTime() : "");
@@ -151,7 +175,7 @@ public class RendezVousForm extends JPanel {
 
         JPanel panel = new JPanel(new GridLayout(6, 2, 10, 10));
         panel.add(new JLabel("Patient Name:"));
-        panel.add(txtPatientName);
+        panel.add(cmbPatientName);
         panel.add(new JLabel("Doctor:"));
         panel.add(txtDoctorName);
         panel.add(new JLabel("Date:"));
@@ -166,14 +190,14 @@ public class RendezVousForm extends JPanel {
         int result = JOptionPane.showConfirmDialog(this, panel, title, JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
         if (result == JOptionPane.OK_OPTION) {
             try {
-                String patientName = txtPatientName.getText();
+                String patientName = (String) cmbPatientName.getSelectedItem();
                 String doctorName = txtDoctorName.getText();
                 String date = txtDate.getText();
                 String time = txtTime.getText();
                 String reason = txtReason.getText();
                 String status = (String) cmbStatus.getSelectedItem();
 
-                if (patientName.isEmpty() || doctorName.isEmpty() || date.isEmpty() || time.isEmpty() || reason.isEmpty()) {
+                if (patientName == null || doctorName.isEmpty() || date.isEmpty() || time.isEmpty() || reason.isEmpty()) {
                     throw new IllegalArgumentException("All fields are required.");
                 }
 
