@@ -208,5 +208,3 @@ public class DossierMedicaleForm extends JPanel {
         return null;
     }
 }
-
-

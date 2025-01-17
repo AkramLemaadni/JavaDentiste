@@ -1,11 +1,17 @@
 package Patient;
 
+import org.jdatepicker.impl.JDatePickerImpl;
+import org.jdatepicker.impl.JDatePanelImpl;
+import org.jdatepicker.impl.UtilDateModel;
+
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Properties;
 
 public class PatientForm extends JPanel {
 
@@ -153,8 +159,23 @@ public class PatientForm extends JPanel {
         JTextField txtEmail = new JTextField(existingPatient != null ? existingPatient.getEmail() : "");
         JTextField txtPhone = new JTextField(existingPatient != null ? existingPatient.getPhone() : "");
         JTextField txtAddress = new JTextField(existingPatient != null ? existingPatient.getAddress() : "");
-        JTextField txtDob = new JTextField(existingPatient != null ? existingPatient.getDateOfBirth() : "");
         JTextField txtHistory = new JTextField(existingPatient != null ? existingPatient.getMedicalHistory() : "");
+
+        // Configure date picker
+        UtilDateModel model = new UtilDateModel();
+        if (existingPatient != null && !existingPatient.getDateOfBirth().isEmpty()) {
+            String[] dateParts = existingPatient.getDateOfBirth().split("-");
+            model.setDate(Integer.parseInt(dateParts[0]), Integer.parseInt(dateParts[1]) - 1, Integer.parseInt(dateParts[2]));
+            model.setSelected(true);
+        }
+
+        Properties properties = new Properties();
+        properties.put("text.today", "Today");
+        properties.put("text.month", "Month");
+        properties.put("text.year", "Year");
+
+        JDatePanelImpl datePanel = new JDatePanelImpl(model, properties);
+        JDatePickerImpl datePicker = new JDatePickerImpl(datePanel, null);
 
         JPanel panel = new JPanel(new GridLayout(6, 2, 10, 10));
         panel.add(new JLabel("Name:"));
@@ -166,7 +187,7 @@ public class PatientForm extends JPanel {
         panel.add(new JLabel("Address:"));
         panel.add(txtAddress);
         panel.add(new JLabel("Date of Birth:"));
-        panel.add(txtDob);
+        panel.add(datePicker);
         panel.add(new JLabel("Medical History:"));
         panel.add(txtHistory);
 
@@ -177,7 +198,7 @@ public class PatientForm extends JPanel {
                 String email = txtEmail.getText();
                 String phone = txtPhone.getText();
                 String address = txtAddress.getText();
-                String dob = txtDob.getText();
+                String dob = model.getValue() != null ? new SimpleDateFormat("yyyy-MM-dd").format(model.getValue()) : "";
                 String history = txtHistory.getText();
 
                 if (name.isEmpty() || email.isEmpty() || phone.isEmpty() || address.isEmpty() || dob.isEmpty() || history.isEmpty()) {
@@ -186,7 +207,8 @@ public class PatientForm extends JPanel {
 
                 return new Patient(
                         existingPatient != null ? existingPatient.getId() : 0,
-                        name, email, phone, address, dob, history, existingPatient != null ? existingPatient.getDateAdded() : ""
+                        name, email, phone, address, dob, history,
+                        existingPatient != null ? existingPatient.getDateAdded() : ""
                 );
             } catch (Exception e) {
                 JOptionPane.showMessageDialog(this, "Invalid input: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);

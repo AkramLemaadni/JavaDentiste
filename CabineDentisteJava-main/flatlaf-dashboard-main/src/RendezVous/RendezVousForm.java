@@ -1,10 +1,15 @@
 package RendezVous;
 
+import org.jdatepicker.impl.JDatePickerImpl;
+import org.jdatepicker.impl.JDatePanelImpl;
+import org.jdatepicker.impl.UtilDateModel;
+
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.io.*;
-import java.util.ArrayList;
+import java.text.SimpleDateFormat;
+import java.util.*;
 import java.util.List;
 
 public class RendezVousForm extends JPanel {
@@ -14,6 +19,8 @@ public class RendezVousForm extends JPanel {
     private List<Appointment> appointments;
     private final String appointmentsFilePath = "C:\\Users\\Admin\\Desktop\\CabineDentisteJava-main\\CabineDentisteJava-main\\flatlaf-dashboard-main\\data\\appointments.txt";
     private final String patientsFilePath = "C:\\Users\\Admin\\Desktop\\CabineDentisteJava-main\\CabineDentisteJava-main\\flatlaf-dashboard-main\\data\\patients.txt";
+    private final String doctorsFilePath = "C:\\Users\\Admin\\Desktop\\CabineDentisteJava-main\\CabineDentisteJava-main\\flatlaf-dashboard-main\\data\\doctors.txt";
+    private final Map<String, String> appointmentSchedule = new HashMap<>(); // Key: DateTime, Value: Patient Name
 
     public RendezVousForm() {
         setLayout(new BorderLayout());
@@ -86,6 +93,8 @@ public class RendezVousForm extends JPanel {
     private void loadAppointmentsFromFile() {
         appointments = Appointment.loadFromFile(appointmentsFilePath);
         tableModel.setRowCount(0);
+        appointmentSchedule.clear(); // Reset the schedule map
+
         for (Appointment appointment : appointments) {
             tableModel.addRow(new Object[]{
                     appointment.getId(),
@@ -96,6 +105,8 @@ public class RendezVousForm extends JPanel {
                     appointment.getReason(),
                     appointment.getStatus()
             });
+            String dateTime = appointment.getDate() + " " + appointment.getTime();
+            appointmentSchedule.put(dateTime, appointment.getPatientName());
         }
     }
 
@@ -113,6 +124,22 @@ public class RendezVousForm extends JPanel {
             JOptionPane.showMessageDialog(this, "Error reading patients file: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
         return patientNames;
+    }
+
+    private List<String> loadDoctorNames() {
+        List<String> doctorNames = new ArrayList<>();
+        try (BufferedReader reader = new BufferedReader(new FileReader(doctorsFilePath))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.split(",");
+                if (parts.length > 1) {
+                    doctorNames.add(parts[1]); // Assuming the name is in the second column
+                }
+            }
+        } catch (IOException e) {
+            JOptionPane.showMessageDialog(this, "Error reading doctors file: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
+        return doctorNames;
     }
 
     private void addAppointment() {
@@ -164,8 +191,21 @@ public class RendezVousForm extends JPanel {
             cmbPatientName.setSelectedItem(existingAppointment.getPatientName());
         }
 
-        JTextField txtDoctorName = new JTextField(existingAppointment != null ? existingAppointment.getDoctor() : "");
-        JTextField txtDate = new JTextField(existingAppointment != null ? existingAppointment.getDate() : "");
+        List<String> doctorNames = loadDoctorNames();
+        JComboBox<String> cmbDoctorName = new JComboBox<>(doctorNames.toArray(new String[0]));
+        if (existingAppointment != null) {
+            cmbDoctorName.setSelectedItem(existingAppointment.getDoctor());
+        }
+
+        // Configure date picker
+        UtilDateModel dateModel = new UtilDateModel();
+        Properties dateProperties = new Properties();
+        dateProperties.put("text.today", "Today");
+        dateProperties.put("text.month", "Month");
+        dateProperties.put("text.year", "Year");
+        JDatePanelImpl datePanel = new JDatePanelImpl(dateModel, dateProperties);
+        JDatePickerImpl datePicker = new JDatePickerImpl(datePanel, new DateLabelFormatter());
+
         JTextField txtTime = new JTextField(existingAppointment != null ? existingAppointment.getTime() : "");
         JTextField txtReason = new JTextField(existingAppointment != null ? existingAppointment.getReason() : "");
         JComboBox<String> cmbStatus = new JComboBox<>(new String[]{"Complété", "En attente", "Annulé"});
@@ -177,9 +217,9 @@ public class RendezVousForm extends JPanel {
         panel.add(new JLabel("Patient Name:"));
         panel.add(cmbPatientName);
         panel.add(new JLabel("Doctor:"));
-        panel.add(txtDoctorName);
+        panel.add(cmbDoctorName);
         panel.add(new JLabel("Date:"));
-        panel.add(txtDate);
+        panel.add(datePicker);
         panel.add(new JLabel("Time:"));
         panel.add(txtTime);
         panel.add(new JLabel("Reason:"));
@@ -191,15 +231,22 @@ public class RendezVousForm extends JPanel {
         if (result == JOptionPane.OK_OPTION) {
             try {
                 String patientName = (String) cmbPatientName.getSelectedItem();
-                String doctorName = txtDoctorName.getText();
-                String date = txtDate.getText();
+                String doctorName = (String) cmbDoctorName.getSelectedItem();
+                String date = new SimpleDateFormat("yyyy-MM-dd").format(dateModel.getValue());
                 String time = txtTime.getText();
                 String reason = txtReason.getText();
                 String status = (String) cmbStatus.getSelectedItem();
 
-                if (patientName == null || doctorName.isEmpty() || date.isEmpty() || time.isEmpty() || reason.isEmpty()) {
+                if (patientName == null || doctorName == null || date.isEmpty() || time.isEmpty() || reason.isEmpty()) {
                     throw new IllegalArgumentException("All fields are required.");
                 }
+
+                String dateTime = date + " " + time;
+                if (appointmentSchedule.containsKey(dateTime)) {
+                    throw new IllegalArgumentException("This appointment time is already taken by: " + appointmentSchedule.get(dateTime));
+                }
+
+                appointmentSchedule.put(dateTime, patientName); // Add to the schedule
 
                 return new Appointment(
                         existingAppointment != null ? existingAppointment.getId() : 0,
@@ -210,5 +257,22 @@ public class RendezVousForm extends JPanel {
             }
         }
         return null;
+    }
+
+    private static class DateLabelFormatter extends JFormattedTextField.AbstractFormatter {
+        private final SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
+
+        @Override
+        public Object stringToValue(String text) throws java.text.ParseException {
+            return dateFormatter.parse(text);
+        }
+
+        @Override
+        public String valueToString(Object value) throws java.text.ParseException {
+            if (value != null) {
+                return dateFormatter.format(value);
+            }
+            return "";
+        }
     }
 }
